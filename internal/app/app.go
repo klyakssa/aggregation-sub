@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -10,6 +11,8 @@ import (
 	"github.com/klyakssa/aggregation-sub/internal/config"
 	"github.com/klyakssa/aggregation-sub/internal/logger"
 	"github.com/klyakssa/aggregation-sub/internal/repository/postgres"
+	"github.com/klyakssa/aggregation-sub/internal/service"
+	httptransport "github.com/klyakssa/aggregation-sub/internal/transport/http"
 	"go.uber.org/zap"
 )
 
@@ -32,21 +35,21 @@ func Run(cfg *config.Config) {
 	logger.Info("Starting application...")
 
 	// сервис
-	// authService := service.NewAuthService(repo, jwtManager)
+	subsService := service.NewSubsService(repo)
 
 	// handler
-	// authHandler := httptransport.NewAuthHandler(logger, authService)
+	subsHandler := httptransport.NewSubscriptionHandler(logger, subsService)
 
 	// router
-	// router := httptransport.NewRouter(logger, cfg, jwtManager)
-	// router.RegisterRoutes(authHandler, ordersHandler, balanceHandler)
+	router := httptransport.NewRouter(logger, cfg)
+	router.RegisterRoutes(subsHandler)
 
-	// go func() {
-	// 	if err := router.Run(ctx); err != nil && errors.Is(err, context.Canceled) {
-	// 		logger.Error("HTTP server stopped unexpectedly", zap.Error(err))
-	// 		cancel()
-	// 	}
-	// }()
+	go func() {
+		if err := router.Run(ctx); err != nil && errors.Is(err, context.Canceled) {
+			logger.Error("HTTP server stopped unexpectedly", zap.Error(err))
+			cancel()
+		}
+	}()
 
 	logger.Info("Application started")
 

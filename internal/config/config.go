@@ -2,7 +2,6 @@ package config
 
 import (
 	"errors"
-	"flag"
 	"fmt"
 	"strings"
 
@@ -26,7 +25,7 @@ type LoggingConfiguration struct {
 }
 
 type DBConfig struct {
-	ConnectionString string `mapstructure:"connection-string"` // database connection string
+	ConnectionString string `mapstructure:"db-dsn"` // database connection string
 }
 
 // Config struct
@@ -50,7 +49,6 @@ func initConfig() {
 	loadDefault()
 	loadFile()
 	loadEnv()
-	loadFlags()
 
 	if viper.GetBool("debug") {
 		viper.SetDefault("logging.level", "debug")
@@ -63,29 +61,6 @@ func loadEnv() {
 	viper.SetEnvPrefix("GOAGGREGATOR")
 	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
 	viper.AutomaticEnv()
-
-	viper.BindEnv("web.run-address", "RUN_ADDRESS")
-	viper.BindEnv("postdb.connection-string", "DATABASE_URI")
-}
-
-func loadFlags() {
-	runAddr := flag.String("a", "", "server run address")
-	dbURI := flag.String("d", "", "database connection string")
-	accrualAddr := flag.String("r", "", "accrual system address")
-
-	flag.Parse()
-
-	if *runAddr != "" {
-		viper.Set("web.run-address", *runAddr)
-	}
-
-	if *dbURI != "" {
-		viper.Set("postdb.connection-string", *dbURI)
-	}
-
-	if *accrualAddr != "" {
-		viper.Set("accrual.address", *accrualAddr)
-	}
 }
 
 const (
@@ -104,7 +79,7 @@ func loadDefault() {
 
 	viper.SetDefault("web.run-address", ":8100")
 
-	viper.SetDefault("postdb.connection-string", "postgres://test:11@localhost:5432/diplom?sslmode=disable") //postgres://postgres:11@localhost:5432/test_prac?sslmode=disable
+	viper.SetDefault("postdb.db-dsn", "postgres://postgres:postgres@localhost:5432/aggregation?sslmode=disable")
 }
 
 func loadFile() {

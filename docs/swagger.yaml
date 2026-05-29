@@ -1,0 +1,393 @@
+definitions:
+  github_com_klyakssa_aggregation-sub_internal_domain_subs.CreateSub:
+    properties:
+      end_date:
+        allOf:
+        - $ref: '#/definitions/github_com_klyakssa_aggregation-sub_internal_domain_subs.MonthYear'
+        description: MM-YYYY
+      price:
+        minimum: 0
+        type: integer
+      service_name:
+        type: string
+      start_date:
+        allOf:
+        - $ref: '#/definitions/github_com_klyakssa_aggregation-sub_internal_domain_subs.MonthYear'
+        description: MM-YYYY
+      user_id:
+        type: string
+    required:
+    - price
+    - service_name
+    - start_date
+    - user_id
+    type: object
+  github_com_klyakssa_aggregation-sub_internal_domain_subs.MonthYear:
+    properties:
+      time.Time:
+        type: string
+    type: object
+  github_com_klyakssa_aggregation-sub_internal_domain_subs.Subscription:
+    properties:
+      end_date:
+        type: string
+      id:
+        type: integer
+      price:
+        minimum: 0
+        type: integer
+      service_name:
+        type: string
+      start_date:
+        type: string
+      user_id:
+        type: string
+    required:
+    - price
+    - service_name
+    - start_date
+    - user_id
+    type: object
+  github_com_klyakssa_aggregation-sub_internal_domain_subs.UpdateSub:
+    properties:
+      end_date:
+        allOf:
+        - $ref: '#/definitions/github_com_klyakssa_aggregation-sub_internal_domain_subs.MonthYear'
+        description: MM-YYYY
+      price:
+        minimum: 0
+        type: integer
+      service_name:
+        type: string
+      start_date:
+        allOf:
+        - $ref: '#/definitions/github_com_klyakssa_aggregation-sub_internal_domain_subs.MonthYear'
+        description: MM-YYYY
+    type: object
+info:
+  contact: {}
+paths:
+  /api/subscriptions:
+    post:
+      consumes:
+      - application/json
+      description: Создает новую подписку для пользователя. Дата должна быть в формате
+        MM-YYYY.
+      parameters:
+      - description: Данные для создания подписки
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_klyakssa_aggregation-sub_internal_domain_subs.CreateSub'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Подписка успешно создана
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Неверный запрос
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Создание подписки
+      tags:
+      - subscriptions
+  /api/subscriptions/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Удаляет подписку по указанному ID
+      parameters:
+      - description: ID подписки
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Подписка успешно удалена
+        "400":
+          description: ID подписки не может быть отрицательным
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Подписка не найдена
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Удаление подписки
+      tags:
+      - subscriptions
+    get:
+      consumes:
+      - application/json
+      description: Возвращает подписку по указанному ID
+      parameters:
+      - description: ID подписки
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Подписка найдена
+          schema:
+            $ref: '#/definitions/github_com_klyakssa_aggregation-sub_internal_domain_subs.Subscription'
+        "400":
+          description: Неверный ID
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Подписка не найдена
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Получение подписки
+      tags:
+      - subscriptions
+    patch:
+      consumes:
+      - application/json
+      description: |-
+        Обновляет поля существующей подписки по ID. Можно обновить одно или несколько полей.
+        Поддерживает как PUT (полное обновление), так и PATCH (частичное обновление).
+      parameters:
+      - description: ID подписки
+        example: 1
+        in: path
+        minimum: 1
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления (хотя бы одно поле)
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_klyakssa_aggregation-sub_internal_domain_subs.UpdateSub'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Обновленная подписка
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Неверный запрос (неверный ID, даты или тело запроса)
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Подписка не найдена
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Обновление подписки
+      tags:
+      - subscriptions
+    put:
+      consumes:
+      - application/json
+      description: |-
+        Обновляет поля существующей подписки по ID. Можно обновить одно или несколько полей.
+        Поддерживает как PUT (полное обновление), так и PATCH (частичное обновление).
+      parameters:
+      - description: ID подписки
+        example: 1
+        in: path
+        minimum: 1
+        name: id
+        required: true
+        type: integer
+      - description: Данные для обновления (хотя бы одно поле)
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/github_com_klyakssa_aggregation-sub_internal_domain_subs.UpdateSub'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Обновленная подписка
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Неверный запрос (неверный ID, даты или тело запроса)
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Подписка не найдена
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Обновление подписки
+      tags:
+      - subscriptions
+  /api/subscriptions/list:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список подписок с пагинацией и фильтрацией
+      parameters:
+      - description: ID пользователя
+        in: query
+        name: user_id
+        required: true
+        type: string
+      - default: 1
+        description: Номер страницы
+        in: query
+        name: page
+        type: integer
+      - default: 20
+        description: Размер страницы
+        in: query
+        name: page_size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список подписок
+          schema:
+            additionalProperties: true
+            type: object
+        "204":
+          description: Список подписок пуст
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Неверный запрос
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Получение списка подписок
+      tags:
+      - subscriptions
+  /api/subscriptions/total:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает общую стоимость подписок за указанный период с фильтрацией
+      parameters:
+      - description: Дата начала (MM-YYYY)
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - description: Дата окончания (MM-YYYY)
+        in: query
+        name: end_date
+        required: true
+        type: string
+      - description: ID пользователя
+        in: query
+        name: user_id
+        type: string
+      - description: Название сервиса
+        in: query
+        name: service_name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Общая стоимость
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Неверный запрос
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Расчет общей стоимости
+      tags:
+      - subscriptions
+  /api/subscriptions/user/{user_id}:
+    get:
+      consumes:
+      - application/json
+      description: Возвращает список всех подписок для указанного пользователя по
+        его ID
+      parameters:
+      - description: UUID пользователя
+        example: 123e4567-e89b-12d3-a456-426614174000
+        format: uuid
+        in: path
+        name: user_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Список подписок пользователя
+          schema:
+            items:
+              $ref: '#/definitions/github_com_klyakssa_aggregation-sub_internal_domain_subs.Subscription'
+            type: array
+        "400":
+          description: Неверный формат user_id
+          schema:
+            additionalProperties: true
+            type: object
+        "404":
+          description: Подписки не найдены
+          schema:
+            additionalProperties: true
+            type: object
+        "500":
+          description: Внутренняя ошибка сервера
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Получение всех подписок пользователя
+      tags:
+      - subscriptions
+swagger: "2.0"
